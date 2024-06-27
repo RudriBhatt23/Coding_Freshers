@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="/quiz.css">
+    <link rel="icon" href="/CODE TECH.svg">
+</head>
+
+<body>
+    <div class="app">
+        <h1>Quiz On Basics Of C</h1>
+        <div class="quiz" id="quiz-container">
+            <div id="user-id-section">
+                <label for="user-id">Enter Your User ID:</label>
+                <input type="text" id="user-id" name="user-id">
+                <button id="start-btn">Start Quiz</button>
+            </div>
+            <h2 id="question" style="display: none;">Question goes here</h2>
+            <div id="answer-buttons" style="display: none;"></div>
+            <button id="next-btn" style="display: none;">Next</button>
+            <div id="score-container" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Define variables to store quiz-related elements
+        const startButton = document.getElementById('start-btn');
+        const questionElement = document.getElementById('question');
+        const answerButtons = document.getElementById('answer-buttons');
+        const nextButton = document.getElementById('next-btn');
+        const scoreContainer = document.getElementById('score-container');
+
+        let questions = []; // Initialize an empty array to store questions
+        let currentQuestionIndex = 0; // Initialize the index of the current question
+        let score = 0; // Initialize the score
+
+        // Function to start the quiz
+        function startQuiz() {
+            // Hide user ID section and show the first question
+            document.getElementById('user-id-section').style.display = 'none';
+            startButton.style.display = 'none';
+            showQuestion(0);
+        }
+
+        // Function to display a question and its options
+        function showQuestion(index) {
+            const currentQuestion = questions[index];
+            questionElement.innerText = `Question ${index + 1}: ${currentQuestion.question}`;
+
+            // Clear existing answer buttons
+            answerButtons.innerHTML = '';
+
+            // Create answer buttons for each option
+            currentQuestion.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.classList.add('btn');
+                button.addEventListener('click', () => selectAnswer(index, i));
+                answerButtons.appendChild(button);
+            });
+
+            // Show answer buttons
+            questionElement.style.display = 'block'; // Show the question
+            answerButtons.style.display = 'block';
+            nextButton.style.display = 'none'; // Hide the next button
+        }
+
+        // Function to handle user's answer selection
+        async function selectAnswer(questionIndex, optionIndex) {
+            const currentQuestion = questions[questionIndex];
+            const selectedOption = currentQuestion.options[optionIndex];
+
+            try {
+                // Fetch the correct answer from the server
+                const response = await fetch(`/correct_answer?id=${currentQuestion.id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch correct answer');
+                }
+                const data = await response.json();
+                const correctAnswer = data.correct_answer;
+
+                // Check if the selected option is correct
+                if (selectedOption === correctAnswer) {
+                    // Update the score if the selected option is correct
+                    score++;
+                }
+            } catch (error) {
+                console.error('Error checking answer:', error);
+            }
+
+            // Disable answer buttons after selection
+            const answerButtons = document.querySelectorAll('#answer-buttons button');
+            answerButtons.forEach(button => {
+                button.disabled = true;
+            });
+
+            // Show the next button
+            nextButton.style.display = 'block';
+        }
+
+        // Function to handle next button click
+        function handleNextButton() {
+            currentQuestionIndex++;
+
+            // Check if there are more questions
+            if (currentQuestionIndex < questions.length) {
+                // Show the next question
+                showQuestion(currentQuestionIndex);
+            } else {
+                // End the quiz if all questions are answered
+                endQuiz();
+            }
+        }
+
+        // Function to end the quiz
+        function endQuiz() {
+            // Hide question and answer buttons
+            questionElement.style.display = 'none';
+            answerButtons.style.display = 'none';
+
+            // Display the score
+            scoreContainer.innerText = `You scored ${score} out of ${questions.length}!`;
+            scoreContainer.style.display = 'block';
+            sendQuizMarksToBackend()
+        }
+
+        function sendQuizMarksToBackend() {
+            const userId = document.getElementById('user-id').value.trim(); // Retrieve user ID from the input field
+
+            fetch('/quiz_results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId, quizScore: score }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to send quiz marks to the server');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Quiz marks sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error sending quiz marks to the server:', error);
+            });
+        }
+
+        // Event listeners
+        startButton.addEventListener('click', startQuiz);
+        nextButton.addEventListener('click', handleNextButton);
+
+        // Fetch questions from the server
+        async function fetchQuestions() {
+            try {
+                const response = await fetch('/questions');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch questions');
+                }
+                const data = await response.json();
+                questions = data;
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        }
+        
+        // Fetch questions when the page loads
+        window.onload = fetchQuestions;
+
+    </script>
+</body>
+
+</html>

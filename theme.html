@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .dark-mode{
+            background-color: black;
+            color: white;
+        }
+        body {
+            background-color: aliceblue;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .btn{
+            border-radius: 9px;
+            font-size: 50px;
+            background-color: orange;
+            border: none;
+            width: 100%;
+        }
+        .btn:hover
+        {
+            background-color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div class="contain">
+      
+            <button class="btn" onclick="myFun()">Dark mode</button>
+    
+    </div>
+    <script>
+        function myFun(){
+         let element =document.body;
+         element.classList.toggle("dark-mode");
+        }
+        
+    </script>
+</body>
+</html>

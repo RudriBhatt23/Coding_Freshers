@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="/quiz.css">
+</head>
+<body>
+    <!-- <form action="/quiz2" method="post"> -->
+    <div class="app">
+        <h1>Quiz On Basics Of C</h1>
+        <div class="quiz" id="quiz-container">
+            <div id="user-id-section">
+                <label for="user-id">Enter Your User ID:</label>
+                <input type="text" id="user-id" name="user-id">
+                <button onclick="startQuiz()">Start Quiz</button>
+            </div>
+            <h2 id="question" style="display: none;">Question goes here</h2>
+            <div id="answer-buttons" style="display: none;">
+                <!-- Answer buttons will be added dynamically -->
+            </div>
+            <button id="next-btn" style="display: none;">Next</button>
+            <div id="score-container" style="display: none;"></div>
+        </div>
+    </div>
+<!-- </form> -->
+    <script>
+        const questions = [
+            {
+                question: "Who invented C++?", 
+                answers: [
+                    { text: "Dennis Ritchie", correct: false }, 
+                    { text: "Ken Thompson", correct: false },
+                    { text: "Brian Kernighan", correct: false }, 
+                    { text: "Bjarne Stroustrup", correct: true },
+                ]
+            },
+            {
+                question: "What is C++?", 
+                answers: [
+                    { text: "C++ is an object-oriented programming language", correct: false }, 
+                    { text: "C++ is a procedural programming language", correct: false },
+                    { text: "C++ supports both procedural and object-oriented programming language", correct: true }, 
+                    { text: "C++ is a functional programming language", correct: false },
+                ]
+            },
+            {
+                question: "Which of the following is the correct syntax of including a user-defined header files in C++?",
+                answers: [
+                    { text: "#include [userdefined]", correct: false },
+                    { text: "#include “userdefined”", correct: true },
+                    { text: "#include <userdefined.h>", correct: false },
+                    { text: "#include <userdefined>", correct: false },
+                ]
+            },
+            {
+                question: "Which of the following is used for comments in C++?",
+                answers: [
+                    { text: "/* comment */", correct: false },
+                    { text: "// comment */", correct: false },
+                    { text: "// comment", correct: true },
+                    { text: "both // comment or /* comment */", correct: false },
+                ]
+            },
+            {
+                question: "Which of the following user-defined header file extension used in C++?",
+                answers: [
+                    { text: "hg", correct: false },
+                    { text: "cpp", correct: false },
+                    { text: "h", correct: true },
+                    { text: "hf", correct: false },
+                ]
+            }
+        ];
+        const userIdInput = document.getElementById('user-id');
+        const quizContainer = document.getElementById('quiz-container');
+        const userIdSection = document.getElementById('user-id-section');
+        const questionElement = document.getElementById("question");
+        const answerButtons = document.getElementById("answer-buttons");
+        const nextButton = document.getElementById("next-btn");
+        let quizStarted = false;
+        let currentQuestionIndex = 0;
+        let score = 0; // Declare score as a global variable
+
+        function startQuiz() {
+            const userId = userIdInput.value.trim();
+            if (userId === "") {
+                alert("Please enter your User ID to start the quiz.");
+                return;
+            }
+            userIdSection.style.display = "none"; // Hide the user ID section
+            userIdInput.disabled = true; // Disable user ID input
+            quizStarted = true; // Set quizStarted to true
+            currentQuestionIndex = 0; // Reset currentQuestionIndex
+            score = 0; // Reset score
+            questionElement.style.display = "block"; // Show the question element
+            nextButton.innerHTML = "Next";
+            showQuestion(); // Call showQuestion after starting the quiz
+        }
+       
+        function showQuestion() {
+      
+            if (!quizStarted) {
+                return;
+            }
+           
+            const currentQuestion = questions[currentQuestionIndex];
+            let questionNo = currentQuestionIndex + 1;
+            questionElement.innerHTML = questionNo + ". " + currentQuestion.question;
+           
+            answerButtons.innerHTML = ""; // Add this line to clear existing buttons
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement("button");
+                button.innerHTML = answer.text;
+                button.classList.add("btn");
+                answerButtons.appendChild(button);
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener("click", selectAnswer);
+           
+            });
+    
+            answerButtons.style.display = "block"; // Display the answer buttons
+        }
+
+        function resetState() {
+            questionElement.style.display = "none"; // Hide the question
+            answerButtons.style.display = "none"; // Hide the answer buttons
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild)
+            }
+            nextButton.style.display = "none";
+            const scoreContainer = document.getElementById('score-container'); // Define scoreContainer here
+            scoreContainer.style.display = "none"; // Hide the score container
+        }
+
+        function endQuiz() {
+            showScore();
+            quizStarted = false;
+            userIdInput.disabled = false; // Enable user ID input
+
+        }
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const isCorrect = selectedButton.dataset.correct === "true";
+            if (isCorrect) {
+                selectedButton.classList.add("correct");
+                score++;
+                console.log(score);
+                
+            } else {
+                selectedButton.classList.add("incorrect");
+            }
+            Array.from(answerButtons.children).forEach(button => {
+                if (button.dataset.correct === "true") {
+                    button.classList.add("correct");
+                }
+                button.disabled = true;
+            });
+            if (currentQuestionIndex < questions.length - 1) {
+                nextButton.style.display = "block";
+            } else {
+                endQuiz();
+            }
+        }
+
+       
+        function handleNextButton() {
+            currentQuestionIndex++;
+          
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showScore();
+            }
+            // resetState();
+        }
+
+        nextButton.addEventListener("click", () => {
+            if (currentQuestionIndex < questions.length) {
+                handleNextButton();
+            } else {
+                startQuiz();
+            }
+        });
+
+        
+        console.log(score);
+        function sendQuizMarksToBackend() {
+            const userId = userIdInput.value.trim(); // Retrieve user ID from the input field
+            const quizScore = score; // Assuming 'score' variable holds the quiz score
+
+            fetch('/quiz2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId, quizScore }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to send quiz marks to the server');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Quiz marks sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error sending quiz marks to the server:', error);
+            });
+        }
+        function showScore() {
+            // resetState();
+            questionElement.innerHTML = `You scored ${score} out of ${questions.length}!`;
+            nextButton.innerHTML = "Play Again";
+            nextButton.style.display = "block";
+            sendQuizMarksToBackend();
+
+        }
+
+
+        // Call the function when the quiz is completed
+        console.log(score);
+        
+        startQuiz();
+       
+    </script>
+</body>
+</html>

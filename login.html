@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up Form</title>
+    <link rel="stylesheet" href="/register.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Sign In</h1>
+        <form id="signup-form" method="post">
+            <select name="role" id="role">
+                <option value="student">student</option>
+                <option value="faculty">faculty</option>
+            </select>
+            <label for="name">Name:</label>
+            <input type="text" id="username" name="username" required>
+            <!-- <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required> -->
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Sign In" href="/home">
+            <!-- <script>
+                // Handle form submission
+                document.getElementById('loginForm').addEventListener('submit', async function(event) {
+                    event.preventDefault(); // Prevent default form submission
+        
+                    // Get username and password from form inputs
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+        
+                    // Send POST request to server to handle login
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+        
+                    if (!response.ok) {
+                        // Display prompt message for invalid username or password
+                        alert('Invalid username or password');
+                    }
+                });
+            </script> -->
+            <!-- <div class="login">
+                <button type="button" onclick="login()">Login</button> -->
+                <!-- <a href="profile.html" class="temp">Login</a> --> 
+            <!-- </div>
+        </form>
+    </div>
+    <script>
+        function login()
+        {
+            var name = document.getElementById('name').value;
+            localStorage.setItem('name',name);
+            window.location.href = 'home.html';
+        }
+    </script> -->
+    <!-- <script type="module" src="./login.js"></script> -->
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <button type="button" onclick="login()">Login</button>
+    </form>
+    <script>
+        function login()
+        {
+            var username = document.getElementById('username').value;
+            localStorage.setItem('username',username);
+            window.location.href = 'profile.html';
+        }
+    </script>
+</body>
+</html> -->
+
+
+<!-- profile -->
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+</head>
+<body>
+    <h2>Profile</h2>
+    <p id="usernameDisplay"></p>
+
+    <script>
+        var username = localStorage.getItem('username');
+        document.getElementById('usernameDisplay').innerText = 'Welcome, ' + username + '!';
+    </script>
+</body>
+</html> -->

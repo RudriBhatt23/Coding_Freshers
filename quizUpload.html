@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #001e4d;
+        }
+        
+        .container {
+            background: #fff;
+            width: 90%;
+            max-width: 600px;
+            margin: 100px auto 0;
+            border-radius: 10px;
+            padding: 30px;
+        }
+        
+        .container h1 {
+            font-size: 25px;
+            color: #001e4d;
+            font-weight: 600;
+            border-bottom: 1px solid #333;
+            padding-bottom: 30px;
+        }
+        
+        .question {
+            margin-bottom: 20px;
+        }
+        
+        .question input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        .options-container {
+            margin-bottom: 10px;
+        }
+        
+        .option {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        .correct-answer {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        #add-question-btn,
+        #save-quiz-btn,
+        #delete-quiz-btn {
+            background: #001e4d;
+            color: #fff;
+            font-weight: 500;
+            width: 100%;
+            border: 0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #add-question-btn:hover,
+        #save-quiz-btn:hover,
+        #delete-quiz-btn:hover {
+            background: #004080;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz Editor</h1>
+        <button id="add-question-btn">Add Question</button>
+        <div id="questions-container"></div>
+        <button id="save-quiz-btn">Save Quiz</button>
+        <button id="delete-quiz-btn">Delete Quiz</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const questionsContainer = document.getElementById("questions-container");
+            const saveQuizButton = document.getElementById("save-quiz-btn");
+            const deleteQuizButton = document.getElementById("delete-quiz-btn");
+
+            let questionIndex = 1;
+            let quizData = [];
+
+            // Function to create a new question element
+            function createQuestionElement() {
+                const questionElement = document.createElement("div");
+                questionElement.classList.add("question");
+                questionElement.dataset.questionId = questionIndex;
+
+                const questionText = document.createElement("input");
+                questionText.type = "text";
+                questionText.placeholder = "Enter question text...";
+                questionText.classList.add("question-text");
+                questionElement.appendChild(questionText);
+
+                const optionsContainer = document.createElement("div");
+                optionsContainer.classList.add("options-container");
+                questionElement.appendChild(optionsContainer);
+
+                for (let i = 1; i <= 4; i++) {
+                    const optionInput = document.createElement("input");
+                    optionInput.type = "text";
+                    optionInput.placeholder = `Option ${i}`;
+                    optionInput.classList.add("option");
+                    optionsContainer.appendChild(optionInput);
+                }
+
+                const correctAnswerInput = document.createElement("input");
+                correctAnswerInput.type = "text";
+                correctAnswerInput.placeholder = "Correct Answer (1-4)";
+                correctAnswerInput.classList.add("correct-answer");
+                questionElement.appendChild(correctAnswerInput);
+
+                questionsContainer.appendChild(questionElement);
+
+                questionIndex++;
+            }
+
+            // Function to update quiz data
+            function updateQuizData() {
+                quizData = [];
+                const questionElements = document.querySelectorAll(".question");
+                questionElements.forEach(questionElement => {
+                    const questionText = questionElement.querySelector(".question-text").value;
+                    const options = Array.from(questionElement.querySelectorAll(".option")).map(input => input.value);
+                    // const correctAnswer = parseInt(questionElement.querySelector(".correct-answer").value);
+                    const correctAnswer = questionElement.querySelector(".correct-answer").value;
+                    quizData.push({ questionText, options, correctAnswer });
+                });
+            }
+
+            // Function to save quiz data
+            async function saveQuiz() {
+                updateQuizData();
+                try {
+                    const response = await fetch("/save-quiz", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ quizData })
+                    });
+                    if (response.ok) {
+                        alert("Quiz saved successfully!");
+                    } else {
+                        throw new Error("Failed to save quiz");
+                    }
+                } catch (error) {
+                    console.error("Error saving quiz:", error);
+                    alert("An error occurred while saving the quiz");
+                }
+            }
+// Function to clear all questions from the container
+function clearQuestions() {
+    questionsContainer.innerHTML = ''; // Clear all child elements
+}
+
+// Function to delete quiz data
+async function deleteQuiz() {
+    try {
+        const response = await fetch("/delete-quiz", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        if (response.ok) {
+            alert("Quiz deleted successfully!");
+            clearQuestions(); // Clear all questions after deleting quiz
+        } else {
+            throw new Error("Failed to delete quiz");
+        }
+    } catch (error) {
+        console.error("Error deleting quiz:", error);
+        alert("An error occurred while deleting the quiz");
+    }
+}
+
+
+            // Add event listener to the "Add Question" button
+            document.getElementById("add-question-btn").addEventListener("click", createQuestionElement);
+
+            // Add event listener to the "Save Quiz" button
+            saveQuizButton.addEventListener("click", saveQuiz);
+
+            // Add event listener to the "Delete Quiz" button
+            deleteQuizButton.addEventListener("click", deleteQuiz);
+        });
+    </script>
+</body>
+</html>
